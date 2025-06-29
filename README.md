@@ -15,8 +15,7 @@ To reproduce the results in this repository, please download the following files
 - Feature vectors (`.npz`) → `Galaxy10_Embedding_vectors/`
 
 Download link for external resources:  
-**[Google Drive Link Placeholder]**
-
+https://www.dropbox.com/scl/fo/siokphup3et0mgp21s3jm/AEjAB50RxawW854G8WdOBUc?rlkey=uits1px0w148vfmdixae04z26&dl=0
 ---
 
 ## Galaxy10 Classes

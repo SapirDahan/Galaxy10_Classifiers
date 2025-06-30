@@ -48,7 +48,7 @@ The dataset includes 21,785 galaxy images labeled into the following 10 morpholo
 
 ## Embedding Comparison Using K-Nearest Neighbors
 
-To evaluate the impact of feature quality, we trained a fixed K-Nearest Neighbors classifier (\(k = 3\)) on embeddings generated from different vision models, including ViTs, CLIP, DINOv2, and ResNet-101 (with and without fine-tuning). This allowed us to isolate the influence of the embeddings themselves.
+To evaluate the impact of feature quality, we trained a K-Nearest Neighbors classifier on embeddings generated from different vision models—including ViTs, CLIP, DINOv2, and ResNet-101 (with and without fine-tuning). For each embedding source, we performed hyperparameter tuning to select the optimal value of k, allowing us to fairly isolate the influence of the embeddings themselves.
 
 | Embedding Source              | Accuracy | Balanced Acc. | Precision | Recall | F1 Score |
 |------------------------------|----------|----------------|-----------|--------|----------|
@@ -57,7 +57,7 @@ To evaluate the impact of feature quality, we trained a fixed K-Nearest Neighbor
 | CLIP ViT-B/32                | 0.6147   | 0.4270         | 0.6005    | 0.4270 | 0.4487   |
 | DINOv2 ViT                   | 0.6043   | 0.4446         | 0.5707    | 0.4446 | 0.4738   |
 | ResNet-101 (ImageNet only)   | 0.5884   | 0.3949         | 0.5018    | 0.3949 | 0.4142   |
-| ResNet-101 (fine-tuned)      | **0.8807** | **0.7750**   | **0.7617**| **0.7550** | **0.7578** |
+| ResNet-101 (fine-tuned on Galaxy10)      | **0.8807** | **0.7750**   | **0.7617**| **0.7550** | **0.7578** |
 
 **Conclusion**: Fine-tuning on Galaxy10 consistently yielded significantly better results, proving that even simple models like KNN can perform well if the feature space is task-specific.
 
@@ -65,64 +65,50 @@ To evaluate the impact of feature quality, we trained a fixed K-Nearest Neighbor
 
 ## Model Explanations
 
-### ResNet-50 / ResNet-101 (End-to-End)
-Deep convolutional neural networks trained directly on RGB images. These models learned both features and classification end-to-end.
+- **Dummy Classifier**  
+  A baseline model that always predicts the most frequent class, regardless of input.  
+  **Accuracy**: 32.1% | **Balanced Accuracy**: 10.0%
 
-- Strengths: Highest overall accuracy (ResNet-50: 0.9088)
-- Weakness: Internal representations (measured via clustering) were not interpretable
-- Setup: 30 epochs, Adam optimizer, image size 69×69
+- **AdaBoost**  
+  An ensemble method that builds a sequence of weak learners (typically shallow decision trees), each focusing more on the mistakes of the previous ones.  
+  **Accuracy**: 82.7% | **Balanced Accuracy**: 69.3%
 
-### Hard/Soft Voting Ensembles
-Combine predictions from multiple models.
+- **K-Nearest Neighbors (KNN)**  
+  A non-parametric model that assigns labels based on the majority vote of the k closest training samples in the embedding space.  
+  **Accuracy**: 88.1% | **Balanced Accuracy**: 75.5%
 
-- Hard voting: Predicts majority class
-- Soft voting: Averages class probabilities
-- Purpose: Improve robustness and compensate for weaknesses of individual models
-- Result: Slight improvement (Hard Voting Accuracy: 0.8837)
+- **Logistic Regression (OvO / OvR)**  
+  A linear classifier that estimates class probabilities using the logistic function; extended to multi-class settings using One-vs-One (OvO) and One-vs-Rest (OvR) schemes.  
+  **Accuracy**: 87.9% | **Balanced Accuracy**: ~75.3–75.7%
 
-### Support Vector Machines (OvO/OvR)
-Finds optimal separating hyperplanes using RBF kernel.
+- **Support Vector Machine (OvO / OvR)**  
+  A powerful classifier that finds the optimal hyperplane to separate classes with maximum margin, using an RBF kernel for nonlinear boundaries; extended to multi-class via OvO/OvR.  
+  **Accuracy**: 88.2% (OvO) | **Balanced Accuracy**: 74.9%
 
-- Strength: Strong performance on high-dimensional embeddings
-- Weakness: Requires tuning (C, gamma), sensitive to imbalance
-- Accuracy: up to 0.8819
+- **Random Forest**  
+  An ensemble of decision trees where each tree is trained on a random subset of features and data samples, improving robustness and reducing overfitting.  
+  **Accuracy**: 88.1% | **Balanced Accuracy**: 75.2%
 
-### Logistic Regression (OvO/OvR)
-Linear model using the logistic function. Useful baseline with interpretable coefficients.
+- **XGBoost**  
+  A gradient boosting method that builds an ensemble of trees sequentially, each correcting the previous one’s errors. It includes regularization and GPU acceleration.  
+  **Accuracy**: 87.2% | **Balanced Accuracy**: 74.1%
 
-- Simple and stable
-- Accuracy: up to 0.8797
+- **Hard Voting Ensemble**  
+  Combines multiple classifiers by selecting the class with the majority of votes from all individual models.  
+  **Accuracy**: 88.4% | **Balanced Accuracy**: 75.3%
 
-### K-Nearest Neighbors
-Instance-based classifier that uses majority voting among closest neighbors.
+- **Soft Voting Ensemble**  
+  Aggregates the predicted probabilities from multiple classifiers and selects the class with the highest average probability.  
+  **Accuracy**: 88.0% | **Balanced Accuracy**: 75.0%
 
-- Embedding-sensitive
-- Best \(k\): 3, Euclidean distance
-- Accuracy: 0.8807
+- **ResNet-50 (End-to-End CNN)**  
+  A deep convolutional neural network trained directly on RGB images, learning both features and classifier weights simultaneously.  
+  **Accuracy**: 90.9% | **Balanced Accuracy**: 78.7%
 
-### Random Forest
-Ensemble of decision trees trained on different data and feature subsets.
-
-- Advantage: Handles nonlinearity well, interpretable
-- Accuracy: 0.8807
-
-### AdaBoost
-Sequential ensemble that focuses on errors of prior learners.
-
-- Weak performance due to sensitivity to noise
-- Accuracy: 0.8268
-
-### XGBoost
-Boosted tree model with regularization and parallelization.
-
-- Robust and fast (GPU used)
-- Accuracy: 0.8724
-
-### Dummy Classifier
-Baseline model predicting the most frequent class.
-
-- Accuracy: 0.3213
-
+- **ResNet-101 (End-to-End CNN)**  
+  A deeper version of ResNet-50 with more layers, offering greater capacity for feature learning at the cost of higher computational demand.  
+  **Accuracy**: 89.8% | **Balanced Accuracy**: 77.2%
+- 
 ---
 
 ## Class Distribution

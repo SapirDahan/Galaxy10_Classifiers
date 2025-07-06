@@ -5,7 +5,7 @@ from tqdm import tqdm
 import torch
 from torch import nn
 from torchvision import transforms
-import timm  # pip install timm
+import timm
 
 # Configuration
 INPUT_DIR = "../Galaxy10_Images"

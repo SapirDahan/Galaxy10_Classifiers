@@ -180,7 +180,7 @@ def main():
     model = models.resnet101(weights=models.ResNet101_Weights.IMAGENET1K_V1)
     num_ftrs = model.fc.in_features
     model.fc = nn.Sequential(
-        nn.Dropout(0.3),            # 🔥 Add Dropout before FC
+        nn.Dropout(0.3),
         nn.Linear(num_ftrs, len(class_names))
     )
     model = model.to(DEVICE)
